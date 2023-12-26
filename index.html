@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://raw.githubusercontent.com/JohnBlazek/codepen-resources/master/3d-carousel/js/libs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+
+    <style>
+
+
+/* hardware accelatator class */	
+	.trans3d
+	{
+		-webkit-transform-style: preserve-3d;
+		-webkit-transform: translate3d(0, 0, 0);
+		-moz-transform-style: preserve-3d;
+		-moz-transform: translate3d(0, 0, 0);
+		-ms-transform-style:preserve-3d;
+		-ms-transform: translate3d(0, 0, 0);
+		transform-style:preserve-3d;
+		transform: translate3d(0, 0, 0);
+
+		/*-webkit-backface-visibility: hidden;
+		-moz-backface-visibility: hidden;
+		-ms-backface-visibility:hidden;
+		backface-visibility:hidden;*/
+	}
+	
+	#contentContainer
+	{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+		position:relative;
+		width: 100%;
+        height: 400px;
+        overflow: hidden;
+	}
+	
+	#carouselContainer
+	{
+		position:absolute;
+		width:100%;
+		height:100%;
+	}
+	
+	.carouselItem
+	{
+        width:320px;
+		height:180px;
+		position:absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+		left:50%;
+		top:50%;
+		margin-left:-160px;
+		margin-top:-90px;
+		visibility:hidden;
+	}
+	
+	.carouselItemInner
+	{
+        width:100%;
+		max-width: 250px;
+        height: 100%;
+		position:absolute;
+		color:aqua;
+        background-color: rgba(255,255,255,0.75);
+		font-size:72px;
+		left:50%;
+		top:50%;
+		margin-left:-160px;
+		margin-top:-90px;
+		text-align:center;
+        object-fit: contain;
+        object-position: center;
+         border: 10px solid rgba(255,255,255,0.75);
+        outline: 2px solid black;
+	}
+
+    /* TABLET STYLES */
+@media only screen and (min-width: 650px) and (max-width: 990px){
+    #contentContainer
+{
+        height: 300px;
+	}
+	
+}
+ 
+/* MOBILE STYLES */
+@media only screen and (max-width: 649px){
+    #contentContainer
+{
+        height: 200px;
+	}
+}
+
+    </style>
+<div id="contentContainer" class="trans3d"> 
+	<section id="carouselContainer" class="trans3d">
+		<a href="https://www.americandynamics.net/" target="_blank" id="item1" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/mxcl5qs.png"/></a>
+
+        <a href="https://www.flir.com/" target="_blank" id="item2" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/n3gLK3q.png"/></a>
+
+        <a href="https://www.exacq.com/" target="_blank" id="item3" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/elQ2F2P.png"/></a>
+
+        <!-- <a href="https://www.southwire.com/" target="_blank" id="item4" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/mQi7Tr3.png"/></a> -->
+
+        <a href="https://www.amgsystems.com/english/amg-systems-homepage" target="_blank" id="item5" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/cK9HIpN.png"/></a>
+
+        <a href="https://illustracameras.com/" target="_blank" id="item6" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/Mr9Qzub.png"/></a>
+
+        <a href="https://www.kantech.com/" target="_blank" id="item7" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/jQarZDx.png"/></a>
+
+        <a href="https://cast-lighting.com/perimeter" target="_blank" id="item8" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/PYSXDod.png"/></a>
+
+        <a href="https://saltosystems.com/en" target="_blank" id="item9" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/XZOFDY5.png"/></a>
+
+        <!-- <a href="https://teleportivity.com/" target="_blank" id="item10" class="carouselItem trans3d"><img class="carouselItemInner trans3d" src="https://i.imgur.com/drtftKL.png"/></a> -->
+	</section>
+	</div>
+    
+<script>
+    // set and cache variables
+		var w, container, carousel, item, radius, itemLength, rY, ticker;
+		const isOnTouch = (window.matchMedia("(max-width: 990px)").matches)
+		var mouseX = 0.15;
+		var mouseY =0.1;
+		var mouseZ =  -(window.innerHeight * .8);
+		var addX = 0;
+		
+		if(isOnTouch){
+			let touchstartX = 0
+			let touchendX = 0
+				
+			function checkDirection() {
+			if (touchendX < touchstartX) {mouseX = -0.15}
+			if (touchendX > touchstartX) {mouseX = 0.15}
+			}
+
+			document.addEventListener('touchstart', e => {
+			touchstartX = e.changedTouches[0].screenX
+			})
+
+			document.addEventListener('touchend', e => {
+			touchendX = e.changedTouches[0].screenX
+			checkDirection()
+			})
+		}
+		
+		
+		$(document).ready( init )
+		
+		function init()
+		{
+			w = $(window);
+			container = $( '#contentContainer' );
+			carousel = $( '#carouselContainer' );
+			item = $( '.carouselItem' );
+			itemLength = $( '.carouselItem' ).length;
+			rY = 360 / itemLength;
+			radius = Math.round( (250) / Math.tan( Math.PI / itemLength ) );
+			
+			// set container 3d props
+			if(window.matchMedia("(max-width: 649px)").matches){
+				TweenMax.set(container, {perspective:200})
+			}else{
+				TweenMax.set(container, {perspective:600})
+			}
+			
+
+			TweenMax.set(carousel, {z:-(radius)})
+			
+			// create carousel item props
+			
+			for ( var i = 0; i < itemLength; i++ )
+			{
+				var $item = item.eq(i);
+				var $block = $item.find('.carouselItemInner');
+				
+        //thanks @chrisgannon!        
+        TweenMax.set($item, {rotationY:rY * i, z:radius, transformOrigin:"50% 50% " + -radius + "px"});
+				
+				animateIn( $item, $block )						
+			}
+			
+			// set mouse x and y props and looper ticker
+			if(!isOnTouch){
+				window.addEventListener( "mousemove", onMouseMove, false );
+			}
+			ticker = setInterval( looper, 1000/60 );			
+		}
+		
+		function animateIn( $item, $block )
+		{
+			var $nrX = 360 * getRandomInt(2);
+			var $nrY = 360 * getRandomInt(2);
+				
+			var $nx = -(2000) + getRandomInt( 4000 )
+			var $ny = -(2000) + getRandomInt( 4000 )
+			var $nz = -4000 +  getRandomInt( 4000 )
+				
+			var $s = 1.5 + (getRandomInt( 10 ) * .1)
+			var $d = 1 - (getRandomInt( 8 ) * .1)
+			
+			TweenMax.set( $item, { autoAlpha:1, delay:$d } )	
+			TweenMax.set( $block, { z:$nz, rotationY:$nrY, rotationX:$nrX, x:$nx, y:$ny, autoAlpha:0} )
+			TweenMax.to( $block, $s, { delay:$d, rotationY:0, rotationX:0, z:0,  ease:Expo.easeInOut} )
+			TweenMax.to( $block, $s-.5, { delay:$d, x:0, y:0, autoAlpha:1, ease:Expo.easeInOut} )
+		}
+		
+		function onMouseMove(event)
+		{
+			const tempMouseX = -(-(window.innerWidth * .5) + event.pageX) * .0025;
+			if(tempMouseX > 0.4){
+				mouseX = 0.4
+			}else if(tempMouseX < -0.4){
+				mouseX = -0.4
+			}else{
+				mouseX = tempMouseX
+			}
+
+			mouseY = -(-(window.innerHeight * .5) + event.pageY ) * .01;
+			mouseZ = -(radius) - (Math.abs(-(window.innerHeight * .5) + event.pageY ) - 200);
+		}
+		
+		// loops and sets the carousel 3d properties
+		function looper()
+		{
+			addX += mouseX
+			TweenMax.to( carousel, 1, { rotationY:addX, rotationX:mouseY, ease:Quint.easeOut } )
+			TweenMax.set( carousel, {z:mouseZ } )
+		}
+		
+		function getRandomInt( $n )
+		{
+			return Math.floor((Math.random()*$n)+1);	
+		}
+</script>
+</body>
+</html>
